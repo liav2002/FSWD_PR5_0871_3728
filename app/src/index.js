@@ -4,6 +4,15 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Suppress specific warning messages
+const consoleErrorOrig = console.error;
+console.error = function(message) {
+  if (message.startsWith('Warning: ReactDOM.render')) {
+    return;
+  }
+  consoleErrorOrig.apply(console, arguments);
+};
+
 ReactDOM.render(
   <React.StrictMode>
     <App />

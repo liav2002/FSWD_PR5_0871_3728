@@ -48,18 +48,18 @@ function Login() {
             <input
               className="input"
               type="text"
-              placeholder="Nom d'utilisateur"
+              placeholder="Username"
               value={username}
               onChange={handleChangeUsername}
             />
             <input
               className="input"
               type="password"
-              placeholder="Mot de passe"
+              placeholder="Password"
               value={password}
               onChange={handleChangePassword}
             />
-            <button className="button">Se connecter</button>
+            <button className="button">Login</button>
           </form>
         </div>
       );
