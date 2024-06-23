@@ -14,7 +14,7 @@ function Login() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await fetch(`https://jsonplaceholder.typicode.com/users`);
+            const response = await fetch(`http://localhost:8000/users`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
