@@ -42,3 +42,17 @@
   .button:hover {
     background-color: #45a049;
   }
+
+  .register-link {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    color: #007BFF;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.register-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}

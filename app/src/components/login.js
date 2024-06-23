@@ -1,8 +1,7 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
-// import Home from './home';
+import { useState } from 'react';
 import '../css/login.css';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link  } from 'react-router-dom';
 
 function Login() {
 
@@ -11,7 +10,7 @@ function Login() {
     const history = useHistory();
 
 
-    const handleSubmit = async (event) => {
+    const loginButtonClicked = async (event) => {
         event.preventDefault();
         try {
             const response = await fetch(`http://localhost:8000/users`);
@@ -30,36 +29,35 @@ function Login() {
             alert(error.message);
         }
     }
-
-
     
-    const handleChangeUsername = (event) => {
+    const handleUsernameChanged = (event) => {
         setUsername(event.target.value);
     }
 
-    const handleChangePassword = (event) => {
+    const handlePasswordChanged = (event) => {
         setPassword(event.target.value)
     }
 
 
     return (
         <div className="container">
-          <form className="form" onSubmit={handleSubmit}>
+          <form className="form" onSubmit={loginButtonClicked}>
             <input
               className="input"
               type="text"
               placeholder="Username"
               value={username}
-              onChange={handleChangeUsername}
+              onChange={handleUsernameChanged}
             />
             <input
               className="input"
               type="password"
               placeholder="Password"
               value={password}
-              onChange={handleChangePassword}
+              onChange={handlePasswordChanged}
             />
             <button className="button">Login</button>
+            <Link to="/register" className="register-link">Don't have an account? Register here.</Link>
           </form>
         </div>
       );
