@@ -56,3 +56,9 @@
     color: #0056b3;
     text-decoration: underline;
 }
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
