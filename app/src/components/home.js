@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link, Switch, Route, useRouteMatch } from 'react-router-dom';
+import { Link, Switch, Route, useRouteMatch } from 'react-router-dom';
 import Info from './info';
 import Albums from './albums';
 import Posts from './posts';
@@ -14,40 +14,31 @@ function Home() {
 
   return (
     <>
-      <nav>
-      <div class="navbar">
-        <span className="navbar-name">{user.name}</span>
-        <div class="container nav-container">
-            <input class="checkbox" type="checkbox" name="" id="" />
-            <div class="hamburger-lines">
-              <span class="line line1"></span>
-              <span class="line line2"></span>
-              <span class="line line3"></span>
-        </div>
-          <div class="menu-items">
-            <li>
-              <Link to={`${url}/info`} className="navbar-link">Info</Link></li>
-            <li>
-              <Link to={`${url}/todos`} className="navbar-link">Todos</Link>
-            </li>
-            <li>
-              <Link to={`${url}/posts`} className="navbar-link">Posts</Link>
-            </li>
-            <li>
-              <Link to={`${url}/albums`} className="navbar-link">Albums</Link>
-            </li>
+      <nav className="navbar">
+        <div className="nav-container">
+          <input className="checkbox" type="checkbox" name="" id="" />
+          <div className="hamburger-lines">
+            <span className="line line1"></span>
+            <span className="line line2"></span>
+            <span className="line line3"></span>
+          </div>
+          <div className="menu-items">
+            <li><Link to={`${url}/info`} className="navbar-link">Info</Link></li>
+            <li><Link to={`${url}/todos`} className="navbar-link">Todos</Link></li>
+            <li><Link to={`${url}/posts`} className="navbar-link">Posts</Link></li>
+            <li><Link to={`${url}/albums`} className="navbar-link">Albums</Link></li>
             <Link
               to="/login"
               onClick={() => localStorage.setItem('user', null)}
               className="logout-link"
-              >
+            >
               <FontAwesomeIcon icon={faSignOutAlt} className="logout-icon" />
             </Link>
           </div>
         </div>
-      </div>
-    </nav>
-    <div className="container">
+        <span className="navbar-name">{user.name}</span>
+      </nav>
+      <div className="container">
         <div className="content">
           <Switch>
             <Route path={`${path}/info`} component={Info} />

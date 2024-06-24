@@ -7,7 +7,8 @@ function Info() {
     <>
       <div className="container">
         <div className="content">
-            <h1>Still In Develop</h1>
+          <h1>Info</h1>
+          <h2>Still In Develop</h2>
         </div>
       </div>
     </>
