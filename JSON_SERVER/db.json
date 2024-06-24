@@ -241,7 +241,7 @@
       }
     },
     {
-      "id": 1719152354594,
+      "id": "1719152354594",
       "name": "Liav Ariel",
       "username": "Liav",
       "password": "Aa123456",
@@ -260,6 +260,30 @@
       "website": "FakeReact",
       "company": {
         "name": "FSWD",
+        "catchPhrase": "",
+        "bs": ""
+      }
+    },
+    {
+      "id": 1719222431060,
+      "name": "meir israel ariche",
+      "username": "admin",
+      "password": "1234",
+      "email": "ariche@g.jct.ac.il",
+      "address": {
+        "street": "",
+        "suite": "",
+        "city": "netanya",
+        "zipcode": "4227819",
+        "geo": {
+          "lat": "",
+          "lng": ""
+        }
+      },
+      "phone": "0523491605",
+      "website": "",
+      "company": {
+        "name": "",
         "catchPhrase": "",
         "bs": ""
       }
