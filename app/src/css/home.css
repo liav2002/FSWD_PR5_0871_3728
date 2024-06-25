@@ -35,11 +35,11 @@ width: 100%;
 }
 
 .navbar-name {
+font-family: courier;
 position: absolute;
 top: 10px;
 font-size: x-large;
-background-color: purple;
-color: pink;
+background: #E9E2D0;
 }
 
 .navbar .menu-items {
