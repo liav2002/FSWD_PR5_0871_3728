@@ -4,6 +4,7 @@ import '../css/todos.css'; // Assuming you will create this CSS file
 function Todos() {
   const user = JSON.parse(localStorage.getItem('user'));
   const [todos, setTodos] = useState([]);
+  const [nextId, setNextId] = useState(0);
   const [sortOption, setSortOption] = useState('serial');
   const [showAddTodo, setShowAddTodo] = useState(false);
   const [newTodoTitle, setNewTodoTitle] = useState('');
@@ -19,6 +20,9 @@ function Todos() {
       const response = await fetch(`http://localhost:8000/todos?userId=${user.id}`);
       const data = await response.json();
       setTodos(data);
+
+      const maxId = Math.max(...data.map(todo => parseInt(todo.id, 10)));
+      setNextId(maxId >= 0 ? maxId + 1 : 1);
     } catch (error) {
       console.error('Error fetching todos:', error);
     }
@@ -80,12 +84,11 @@ function Todos() {
   };
 
   const addTodo = async () => {
-    const newId = todos.length > 0 ? parseInt(todos[todos.length - 1].id, 10) + 1 : 1;
     const todoToAdd = { 
+      userId: parseInt(user.id, 10),
+      id: nextId.toString(),
       title: newTodoTitle, 
-      id: newId.toString(),
-      completed: false, 
-      userId: user.id 
+      completed: false
     };
     try {
       const response = await fetch(`http://localhost:8000/todos`, {
@@ -99,6 +102,7 @@ function Todos() {
       setTodos([...todos, addedTodo]);
       setShowAddTodo(false);
       setNewTodoTitle('');
+      setNextId(nextId + 1);
     } catch (error) {
       console.error('Error adding todo:', error);
     }
