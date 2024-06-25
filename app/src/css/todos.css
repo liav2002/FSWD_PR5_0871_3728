@@ -25,7 +25,7 @@
   .page-header .title {
     color: #7c1a86; 
     font-size: 24px; 
-    margin-right: 450px;
+    margin-right: 125px;
   }
   
   .page-header .add-todo-btn {
@@ -134,3 +134,11 @@
     color: #7c1a86; 
   }
   
+  .sort-select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 10px; /* Adjust margin as needed */
+    margin-right: 125px;
+  }

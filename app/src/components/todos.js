@@ -133,6 +133,12 @@ function Todos() {
       <div className="header">
         <div className="page-header">
           <h1 className="title">Todos:</h1>
+          <select className="sort-select" value={sortOption} onChange={handleSortChange}>
+            <option value="serial">Sort by Serial</option>
+            <option value="execution">Sort by Execution Date</option>
+            <option value="alphabetical">Sort Alphabetically</option>
+            <option value="random">Sort Randomly</option>
+          </select>
           <button className="add-todo-btn" onClick={() => setShowAddTodo(true)}>
             Add Todo
           </button>
@@ -141,7 +147,7 @@ function Todos() {
 
       <div className="content">
         <ul className="todo-list">
-            {todos.map((todo) => (
+            {sortedTodos.map((todo) => (
               <li key={todo.id} className="todo-item">
                 <input
                   type="checkbox"
@@ -152,7 +158,7 @@ function Todos() {
                 <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
               </li>
             ))}
-        </ul>
+          </ul>
       </div>
 
       {showAddTodo && (
