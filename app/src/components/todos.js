@@ -13,6 +13,7 @@ function Todos() {
 
   useEffect(() => {
     fetchTodos();
+    initNextId();
   }, []);
 
   const fetchTodos = async () => {
@@ -25,6 +26,17 @@ function Todos() {
       setNextId(maxId >= 0 ? maxId + 1 : 1);
     } catch (error) {
       console.error('Error fetching todos:', error);
+    }
+  };
+
+  const initNextId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/todos/`);
+      const data = await response.json();
+      const maxId = Math.max(...data.map(todo => parseInt(todo.id, 10)));
+      setNextId(maxId >= 0 ? maxId + 1 : 1);
+    } catch (error) {
+      console.error('Error initial next id:', error);
     }
   };
 
@@ -69,10 +81,18 @@ function Todos() {
   const handleRemoveTodo = async () => {
     if (password === user.password) {
       try {
-        await fetch(`http://localhost:8000/todos/${removeTodoId}`, {
+        await fetch(`http://localhost:8000/todos/${parseInt(removeTodoId, 10)}`, {
           method: 'DELETE',
         });
-        setTodos(todos.filter(todo => todo.id !== removeTodoId));
+  
+        // Convert removeTodoId to string before comparison
+        const idToRemove = removeTodoId.toString();
+  
+        // Filter out the todo with matching ID
+        const updatedTodos = todos.filter(todo => todo.id !== idToRemove);
+        setTodos(updatedTodos);
+  
+        // Reset states
         setRemoveTodoId(null);
         setPassword('');
       } catch (error) {
