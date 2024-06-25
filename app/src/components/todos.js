@@ -53,7 +53,7 @@ function Todos() {
         if (!a.completed && b.completed) return -1;
         return new Date(a.execution) - new Date(b.execution);
       case 'alphabetical':
-        return a.text.localeCompare(b.text);
+        return a.title.localeCompare(b.title);
       case 'random':
         return Math.random() - 0.5;
       default:
@@ -135,7 +135,7 @@ function Todos() {
           <h1 className="title">Todos:</h1>
           <select className="sort-select" value={sortOption} onChange={handleSortChange}>
             <option value="serial">Sort by Serial</option>
-            <option value="execution">Sort by Execution Date</option>
+            <option value="execution">Sort by Complete</option>
             <option value="alphabetical">Sort Alphabetically</option>
             <option value="random">Sort Randomly</option>
           </select>
@@ -158,7 +158,7 @@ function Todos() {
                 <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
               </li>
             ))}
-          </ul>
+        </ul>
       </div>
 
       {showAddTodo && (
