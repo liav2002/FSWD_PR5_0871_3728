@@ -152,15 +152,25 @@ function Posts() {
   const handleRemovePost = async () => {
     if (password === user.password) {
       try {
-        await fetch(`http://localhost:8000/posts/${removePostId}`, {
+        const response = await fetch(`http://localhost:8000/comments?postId=${parseInt(removePostId, 10)}`);
+        const commentsToDelete = await response.json();
+
+        await fetch(`http://localhost:8000/posts/${parseInt(removePostId, 10)}`, {
           method: 'DELETE',
         });
+  
+        await Promise.all(commentsToDelete.map(async (comment) => {
+          await fetch(`http://localhost:8000/comments/${parseInt(comment.id, 10)}`, {
+            method: 'DELETE',
+          });
+        }));
 
         setPosts(posts.filter((post) => post.id !== removePostId));
+        setComments(comments.filter((comment) => !commentsToDelete.some(c => c.id === comment.id)));
         setRemovePostId(null);
         setPassword('');
       } catch (error) {
-        console.error('Error removing post:', error);
+        console.error('Error removing post and comments:', error);
       }
     } else {
       alert('Incorrect password');
