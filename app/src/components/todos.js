@@ -132,7 +132,7 @@ function Todos() {
     <div className="container">
       <div className="header">
         <div className="page-header">
-          <h1 className="title">Todos:</h1>
+          <h1 className="title">Todos</h1>
           <select className="sort-select" value={sortOption} onChange={handleSortChange}>
             <option value="serial">Sort by Serial</option>
             <option value="execution">Sort by Complete</option>
