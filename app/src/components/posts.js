@@ -31,6 +31,7 @@ function Posts() {
   const [commentId, setCommentId] = useState(null);
   const [isEditingComment, setIsEditingComment] = useState(false);
   const [showCommentAuthenticatorBeforeEdit, setShowCommentAuthenticatorBeforeEdit] = useState(false);
+  const [showCommentAuthenticatorBeforeRemove, setShowCommentAuthenticatorBeforeRemove] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -231,25 +232,6 @@ function Posts() {
     }
   };
 
-  const handleRemoveComment = async (commentId) => {
-    const comment = comments.find((comment) => comment.id === commentId);
-    const userData = await fetchUserByEmail(comment.email);
-
-    if (password === userData.password) {
-      try {
-        await fetch(`http://localhost:8000/comments/${commentId}`, {
-          method: 'DELETE',
-        });
-
-        setComments(comments.filter((comment) => comment.id !== commentId));
-      } catch (error) {
-        console.error('Error removing comment:', error);
-      }
-    } else {
-      alert('Incorrect password');
-    }
-  };
-
   const handleEditComment = async () => {
     try {
       const response = await fetch(`http://localhost:8000/comments/${commentId}`, {
@@ -297,6 +279,51 @@ function Posts() {
       if (userData.password === commentPassword) {
         setIsEditingComment(true);
         setShowCommentAuthenticatorBeforeEdit(false);
+      } else {
+        alert('Incorrect password');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const handleRemoveComment = async () => {
+    const comment = comments.find((comment) => comment.id === commentId);
+    const userData = await fetchUserByEmail(comment.email);
+
+    try {
+      await fetch(`http://localhost:8000/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+
+      setComments(comments.filter((comment) => comment.id !== commentId));
+    } catch (error) {
+      console.error('Error removing comment:', error);
+    }
+  };
+
+  const handleRemoveCommentAuth = async (id) => {
+    const comment = comments.find((comment) => comment.id === id);
+
+    // Set initial comment body for editing
+    setCommentId(id);
+    setShowCommentAuthenticatorBeforeRemove(true);
+  };
+
+  const handleAuthenticatorForRemoveComments = async () => {
+    const comment = comments.find((comment) => comment.id === commentId);
+
+    // Fetch user data to authenticate
+    try {
+      const response = await fetch(`http://localhost:8000/users?email=${comment.email}`);
+      const [userData] = await response.json();
+      
+      if (!userData) {
+        alert('User not found');
+      }
+      if (userData.password === commentPassword) {
+        setShowCommentAuthenticatorBeforeRemove(false);
+        handleRemoveComment();
       } else {
         alert('Incorrect password');
       }
@@ -406,7 +433,7 @@ function Posts() {
                       <p><strong>{comment.name}</strong> ({comment.email})</p>
                       <p>{comment.body}</p>
                       <button onClick={() => handleEditCommentAuth(comment.id)}>Edit</button>
-                      <button onClick={() => handleRemoveComment(comment.id)}>Remove</button>
+                      <button onClick={() => handleRemoveCommentAuth(comment.id)}>Remove</button>
                     </>
                   )}
                 </li>
@@ -497,6 +524,23 @@ function Posts() {
             />
             <button onClick={handleAuthenticatorForEditComments}>Authenticate</button>
             <button onClick={() => setShowCommentAuthenticatorBeforeEdit(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {showCommentAuthenticatorBeforeRemove && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowCommentAuthenticatorBeforeRemove(false)}>&times;</span>
+            <h2>Authenticate Yourself</h2>
+            <input
+              type="password"
+              placeholder="Your Password"
+              value={commentPassword}
+              onChange={(e) => setCommentPassword(e.target.value)}
+            />
+            <button onClick={handleAuthenticatorForRemoveComments}>Authenticate</button>
+            <button onClick={() => setShowCommentAuthenticatorBeforeRemove(false)}>Cancel</button>
           </div>
         </div>
       )}
