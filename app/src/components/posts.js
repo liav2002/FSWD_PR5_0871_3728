@@ -7,6 +7,12 @@ function Posts() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showAddPost, setShowAddPost] = useState(false);
+  const [newPostTitle, setNewPostTitle] = useState('');
+  const [newPostBody, setNewPostBody] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [removePostId, setRemovePostId] = useState(null);
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     fetchPosts();
@@ -44,14 +50,77 @@ function Posts() {
     setComments([]);
   };
 
+  const handleAddPost = async () => {
+    const newPost = {
+      userId: user.id,
+      title: newPostTitle,
+      body: newPostBody,
+    };
+
+    try {
+      const response = await fetch(`http://localhost:8000/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPost),
+      });
+
+      const addedPost = await response.json();
+      setPosts([...posts, addedPost]);
+      setShowAddPost(false);
+      setNewPostTitle('');
+      setNewPostBody('');
+    } catch (error) {
+      console.error('Error adding post:', error);
+    }
+  };
+
+  const handleRemovePost = async () => {
+    if (password === user.password) {
+      try {
+        await fetch(`http://localhost:8000/posts/${removePostId}`, {
+          method: 'DELETE',
+        });
+
+        setPosts(posts.filter((post) => post.id !== removePostId));
+        setRemovePostId(null);
+        setPassword('');
+      } catch (error) {
+        console.error('Error removing post:', error);
+      }
+    } else {
+      alert('Incorrect password');
+    }
+  };
+
+  const filteredPosts = posts.filter((post) =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container">
+      <div className="header">
+        <div className="page-header">
+          <h1 className="title">Posts</h1>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search posts by title"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button className="add-post-btn" onClick={() => setShowAddPost(true)}>
+            Add Post
+          </button>
+        </div>
+      </div>
       <div className="content">
-        <h1>Posts</h1>
         <ul className="post-list">
-          {posts.map((post) => (
-            <li key={post.id} className="post-item" onClick={() => handlePostClick(post)}>
-              {post.title}
+          {filteredPosts.map((post) => (
+            <li key={post.id} className="post-item">
+              <span onClick={() => handlePostClick(post)}>{post.title}</span>
+              <button className="remove-btn" onClick={() => setRemovePostId(post.id)}>Remove</button>
             </li>
           ))}
         </ul>
@@ -72,6 +141,45 @@ function Posts() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      )}
+
+      {showAddPost && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowAddPost(false)}>&times;</span>
+            <h2>Add New Post</h2>
+            <input
+              type="text"
+              placeholder="Title"
+              value={newPostTitle}
+              onChange={(e) => setNewPostTitle(e.target.value)}
+            />
+            <textarea
+              placeholder="Body"
+              value={newPostBody}
+              onChange={(e) => setNewPostBody(e.target.value)}
+            />
+            <button onClick={handleAddPost}>Add Post</button>
+            <button onClick={() => setShowAddPost(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {removePostId !== null && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setRemovePostId(null)}>&times;</span>
+            <h2>Confirm Removal</h2>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleRemovePost}>Confirm</button>
+            <button onClick={() => setRemovePostId(null)}>Cancel</button>
           </div>
         </div>
       )}
