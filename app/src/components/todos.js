@@ -1,17 +1,180 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import '../css/todos.css'; // Assuming you will create this CSS file
 
 function Todos() {
   const user = JSON.parse(localStorage.getItem('user'));
+  const [todos, setTodos] = useState([]);
+  const [sortOption, setSortOption] = useState('serial');
+  const [showAddTodo, setShowAddTodo] = useState(false);
+  const [newTodo, setNewTodo] = useState({ text: '', execution: '', serial: 0 });
+  const [password, setPassword] = useState('');
+  const [removeTodoId, setRemoveTodoId] = useState(null);
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/todos?userId=${user.id}`);
+      const data = await response.json();
+      setTodos(data);
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+    }
+  };
+
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+
+  const sortedTodos = [...todos].sort((a, b) => {
+    switch (sortOption) {
+      case 'serial':
+        return 0;
+      case 'execution':
+        if (a.completed && !b.completed) return 1;
+        if (!a.completed && b.completed) return -1;
+        return new Date(a.execution) - new Date(b.execution);
+      case 'alphabetical':
+        return a.text.localeCompare(b.text);
+      case 'random':
+        return Math.random() - 0.5;
+      default:
+        return 0;
+    }
+  });
+
+  const toggleComplete = async (id) => {
+    try {
+      const todo = todos.find(todo => todo.id === id);
+      const updatedTodo = { ...todo, completed: !todo.completed };
+      await fetch(`http://localhost:8000/todos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTodo),
+      });
+      setTodos(todos.map(todo => (todo.id === id ? updatedTodo : todo)));
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
+  };
+
+  const handleRemoveTodo = async () => {
+    if (password === user.password) {
+      try {
+        await fetch(`http://localhost:8000/todos/${removeTodoId}`, {
+          method: 'DELETE',
+        });
+        setTodos(todos.filter(todo => todo.id !== removeTodoId));
+        setRemoveTodoId(null);
+        setPassword('');
+      } catch (error) {
+        console.error('Error removing todo:', error);
+      }
+    } else {
+      alert('Incorrect password');
+    }
+  };
+
+  const addTodo = async () => {
+    const newId = todos.length ? todos[todos.length - 1].id + 1 : 1;
+    const todoToAdd = { ...newTodo, id: newId, completed: false, userId: user.id };
+    try {
+      const response = await fetch(`http://localhost:8000/todos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(todoToAdd),
+      });
+      const addedTodo = await response.json();
+      setTodos([...todos, addedTodo]);
+      setShowAddTodo(false);
+      setNewTodo({ text: '', execution: '', serial: todos.length + 1 });
+    } catch (error) {
+      console.error('Error adding todo:', error);
+    }
+  };
 
   return (
-    <>
-      <div className="container">
-        <div className="content">
-          <h1>Todos</h1>
-          <h2>Still In Develop</h2>
+    <div className="container">
+      <div className="header">
+        <div className="page-header">
+          <h1 className="title">Todos:</h1>
+          <button className="add-todo-btn" onClick={() => setShowAddTodo(true)}>
+            Add Todo
+          </button>
         </div>
       </div>
-    </>
+
+      <div className="content">
+        <ul className="todo-list">
+            {todos.map((todo) => (
+              <li key={todo.id} className="todo-item">
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => toggleComplete(todo.id)}
+                />
+                {todo.title}
+                <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
+              </li>
+            ))}
+        </ul>
+      </div>
+
+      {showAddTodo && (
+        <div className="modal">
+          <div className="modal-content">
+            <span
+              className="close"
+              onClick={() => setShowAddTodo(false)}
+            >
+              &times;
+            </span>
+            <h2>Add New Todo</h2>
+            <input
+              type="text"
+              placeholder="Text"
+              value={newTodo.text}
+              onChange={(e) =>
+                setNewTodo({ ...newTodo, text: e.target.value })
+              }
+            />
+            <input
+              type="date"
+              placeholder="Execution Date"
+              value={newTodo.execution}
+              onChange={(e) =>
+                setNewTodo({ ...newTodo, execution: e.target.value })
+              }
+            />
+            <button onClick={addTodo}>Add</button>
+            <button onClick={() => setShowAddTodo(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {removeTodoId !== null && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setRemoveTodoId(null)}>&times;</span>
+            <h2>Confirm Removal</h2>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleRemoveTodo}>Confirm</button>
+            <button onClick={() => setRemoveTodoId(null)}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
