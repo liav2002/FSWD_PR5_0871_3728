@@ -3,26 +3,34 @@ import '../css/posts.css';
 
 function Posts() {
   const user = JSON.parse(localStorage.getItem('user'));
-  const [nextPostId, setNextPostId] = useState(null);
-  const [nextCommentId, setNextCommentId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [showAddPost, setShowAddPost] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostBody, setNewPostBody] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [nextPostId, setNextPostId] = useState(null);
+
   const [removePostId, setRemovePostId] = useState(null);
   const [password, setPassword] = useState('');
+
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingBody, setIsEditingBody] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedBody, setEditedBody] = useState('');
-  const [isAddingComment, setIsAddingComment] = useState(false); // Added state for adding comments
+
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [nextCommentId, setNextCommentId] = useState(null);
   const [commentUserName, setCommentUserName] = useState('');
   const [commentPassword, setCommentPassword] = useState('');
   const [commentBody, setCommentBody] = useState('');
+
+  const [commentId, setCommentId] = useState(null);
+  const [isEditingComment, setIsEditingComment] = useState(false);
+  const [showCommentAuthenticatorBeforeEdit, setShowCommentAuthenticatorBeforeEdit] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -242,32 +250,58 @@ function Posts() {
     }
   };
 
-  const handleEditComment = async (commentId, updatedBody) => {
+  const handleEditComment = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/comments/${commentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...comments.find((comment) => comment.id === commentId),
+          body: commentBody,
+        }),
+      });
+
+      const updatedComment = await response.json();
+      setComments(comments.map((comment) =>
+        comment.id === updatedComment.id ? updatedComment : comment
+      ));
+      setIsEditingComment(false);
+    } catch (error) {
+      console.error('Error updating comment:', error);
+    }
+  };
+
+
+  const handleEditCommentAuth = async (id) => {
+    const comment = comments.find((comment) => comment.id === id);
+
+    // Set initial comment body for editing
+    setCommentBody(comment.body);
+    setCommentId(id);
+    setShowCommentAuthenticatorBeforeEdit(true);
+  };
+
+  const handleAuthenticatorForEditComments = async () => {
     const comment = comments.find((comment) => comment.id === commentId);
-    const userData = await fetchUserByEmail(comment.email);
 
-    if (password === userData.password) {
-      try {
-        const response = await fetch(`http://localhost:8000/comments/${commentId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...comment,
-            body: updatedBody,
-          }),
-        });
-
-        const updatedComment = await response.json();
-        setComments(comments.map((comment) =>
-          comment.id === updatedComment.id ? updatedComment : comment
-        ));
-      } catch (error) {
-        console.error('Error updating comment:', error);
+    // Fetch user data to authenticate
+    try {
+      const response = await fetch(`http://localhost:8000/users?email=${comment.email}`);
+      const [userData] = await response.json();
+      
+      if (!userData) {
+        alert('User not found');
       }
-    } else {
-      alert('Incorrect password');
+      if (userData.password === commentPassword) {
+        setIsEditingComment(true);
+        setShowCommentAuthenticatorBeforeEdit(false);
+      } else {
+        alert('Incorrect password');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -351,19 +385,30 @@ function Posts() {
             </div>
             <h3>Comments</h3>
             {user && (
-              <button onClick={() => setIsAddingComment(true)}>+</button>
+              <button onClick={() => setIsAddingComment(true)}>New Comment</button>
             )}
             <ul className="comment-list">
               {comments.map((comment) => (
                 <li key={comment.id} className="comment-item">
-                  <p><strong>{comment.name}</strong> ({comment.email})</p>
-                  {comment.userId === user.id && (
+                  {isEditingComment && comment.id === commentId ? (
                     <>
-                      <button onClick={() => handleEditComment(comment.id, prompt('Enter updated comment:', comment.body))}>Edit</button>
+                      <textarea
+                        placeholder="Your Comment"
+                        value={commentBody}
+                        onChange={(e) => setCommentBody(e.target.value)}
+                        style={{ width: '100%', height: '100px' }}
+                      />
+                      <button onClick={handleEditComment}>Save</button>
+                      <button onClick={() => setIsEditingComment(false)}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <p><strong>{comment.name}</strong> ({comment.email})</p>
+                      <p>{comment.body}</p>
+                      <button onClick={() => handleEditCommentAuth(comment.id)}>Edit</button>
                       <button onClick={() => handleRemoveComment(comment.id)}>Remove</button>
                     </>
                   )}
-                  <p>{comment.body}</p>
                 </li>
               ))}
             </ul>
@@ -438,6 +483,24 @@ function Posts() {
           </div>
         </div>
       )}
+
+      {showCommentAuthenticatorBeforeEdit && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowCommentAuthenticatorBeforeEdit(false)}>&times;</span>
+            <h2>Authenticate Yourself</h2>
+            <input
+              type="password"
+              placeholder="Your Password"
+              value={commentPassword}
+              onChange={(e) => setCommentPassword(e.target.value)}
+            />
+            <button onClick={handleAuthenticatorForEditComments}>Authenticate</button>
+            <button onClick={() => setShowCommentAuthenticatorBeforeEdit(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
