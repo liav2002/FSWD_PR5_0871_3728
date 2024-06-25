@@ -6,7 +6,7 @@ function Todos() {
   const [todos, setTodos] = useState([]);
   const [sortOption, setSortOption] = useState('serial');
   const [showAddTodo, setShowAddTodo] = useState(false);
-  const [newTodo, setNewTodo] = useState({ text: '', execution: '', serial: 0 });
+  const [newTodoTitle, setNewTodoTitle] = useState('');
   const [password, setPassword] = useState('');
   const [removeTodoId, setRemoveTodoId] = useState(null);
 
@@ -80,8 +80,13 @@ function Todos() {
   };
 
   const addTodo = async () => {
-    const newId = todos.length ? todos[todos.length - 1].id + 1 : 1;
-    const todoToAdd = { ...newTodo, id: newId, completed: false, userId: user.id };
+    const newId = todos.length > 0 ? parseInt(todos[todos.length - 1].id, 10) + 1 : 1;
+    const todoToAdd = { 
+      title: newTodoTitle, 
+      id: newId.toString(),
+      completed: false, 
+      userId: user.id 
+    };
     try {
       const response = await fetch(`http://localhost:8000/todos`, {
         method: 'POST',
@@ -93,7 +98,7 @@ function Todos() {
       const addedTodo = await response.json();
       setTodos([...todos, addedTodo]);
       setShowAddTodo(false);
-      setNewTodo({ text: '', execution: '', serial: todos.length + 1 });
+      setNewTodoTitle('');
     } catch (error) {
       console.error('Error adding todo:', error);
     }
@@ -139,17 +144,9 @@ function Todos() {
             <input
               type="text"
               placeholder="Text"
-              value={newTodo.text}
+              value={newTodoTitle}
               onChange={(e) =>
-                setNewTodo({ ...newTodo, text: e.target.value })
-              }
-            />
-            <input
-              type="date"
-              placeholder="Execution Date"
-              value={newTodo.execution}
-              onChange={(e) =>
-                setNewTodo({ ...newTodo, execution: e.target.value })
+                setNewTodoTitle(e.target.value)
               }
             />
             <button onClick={addTodo}>Add</button>
