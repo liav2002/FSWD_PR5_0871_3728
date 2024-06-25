@@ -14,6 +14,10 @@ function Posts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [removePostId, setRemovePostId] = useState(null);
   const [password, setPassword] = useState('');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingBody, setIsEditingBody] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedBody, setEditedBody] = useState('');
 
   useEffect(() => {
     fetchPosts();
@@ -53,6 +57,8 @@ function Posts() {
 
   const handlePostClick = (post) => {
     setSelectedPost(post);
+    setEditedTitle(post.title);
+    setEditedBody(post.body);
     fetchComments(post.id);
     setIsModalOpen(true);
   };
@@ -61,11 +67,13 @@ function Posts() {
     setIsModalOpen(false);
     setSelectedPost(null);
     setComments([]);
+    setIsEditingTitle(false);
+    setIsEditingBody(false);
   };
 
   const handleAddPost = async () => {
     const newPost = {
-      userId: parseInt(user.id,10),
+      userId: parseInt(user.id, 10),
       id: nextPostId.toString(),
       title: newPostTitle,
       body: newPostBody
@@ -109,6 +117,32 @@ function Posts() {
     }
   };
 
+  const handleSaveEdit = async () => {
+    const updatedPost = {
+      ...selectedPost,
+      title: editedTitle,
+      body: editedBody,
+    };
+
+    try {
+      const response = await fetch(`http://localhost:8000/posts/${selectedPost.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPost),
+      });
+
+      const updatedPostData = await response.json();
+      setPosts(posts.map((post) => (post.id === updatedPostData.id ? updatedPostData : post)));
+      setSelectedPost(updatedPostData);
+      setIsEditingTitle(false);
+      setIsEditingBody(false);
+    } catch (error) {
+      console.error('Error updating post:', error);
+    }
+  };
+
   const filteredPosts = posts.filter((post) =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -134,14 +168,14 @@ function Posts() {
         <ul className="post-list">
           {filteredPosts.map((post) => (
             <li key={post.id} className="post-item" onClick={() => handlePostClick(post)}>
-            <span>{post.title}</span>
-            <button className="remove-btn" onClick={(e) => {
-              e.stopPropagation();
-              setRemovePostId(post.id);
-            }}>
-              Remove
-            </button>
-          </li>
+              <span>{post.title}</span>
+              <button className="remove-btn" onClick={(e) => {
+                e.stopPropagation();
+                setRemovePostId(post.id);
+              }}>
+                Remove
+              </button>
+            </li>
           ))}
         </ul>
       </div>
@@ -150,8 +184,43 @@ function Posts() {
         <div className="modal">
           <div className="modal-content">
             <span className="close" onClick={closeModal}>&times;</span>
-            <h2>{selectedPost.title}</h2>
-            <p>{selectedPost.body}</p>
+            <div className="modal-header">
+              {isEditingTitle ? (
+                <>
+                  <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    style={{ flexGrow: 1 }}
+                  />
+                  <button onClick={handleSaveEdit}>Save</button>
+                  <button onClick={() => setIsEditingTitle(false)}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  <h2>{selectedPost.title}</h2>
+                  <button onClick={() => setIsEditingTitle(true)}>Edit</button>
+                </>
+              )}
+            </div>
+            <div className="modal-body">
+              {isEditingBody ? (
+                <>
+                  <textarea
+                    value={editedBody}
+                    onChange={(e) => setEditedBody(e.target.value)}
+                    style={{ width: '100%', height: '200px' }}
+                  />
+                  <button onClick={handleSaveEdit}>Save</button>
+                  <button onClick={() => setIsEditingBody(false)}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  <p>{selectedPost.body}</p>
+                  <button onClick={() => setIsEditingBody(true)}>Edit</button>
+                </>
+              )}
+            </div>
             <h3>Comments</h3>
             <ul className="comment-list">
               {comments.map((comment) => (
