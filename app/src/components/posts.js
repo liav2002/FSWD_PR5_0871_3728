@@ -3,6 +3,7 @@ import '../css/posts.css';
 
 function Posts() {
   const user = JSON.parse(localStorage.getItem('user'));
+  const [nextPostId, setNextPostId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -16,6 +17,7 @@ function Posts() {
 
   useEffect(() => {
     fetchPosts();
+    initNextPostId();
   }, []);
 
   const fetchPosts = async () => {
@@ -25,6 +27,17 @@ function Posts() {
       setPosts(data);
     } catch (error) {
       console.error('Error fetching posts:', error);
+    }
+  };
+
+  const initNextPostId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/posts/`);
+      const data = await response.json();
+      const maxId = Math.max(...data.map(post => parseInt(post.id, 10)));
+      setNextPostId(maxId >= 0 ? maxId + 1 : 1);
+    } catch (error) {
+      console.error('Error initial next id:', error);
     }
   };
 
@@ -52,9 +65,10 @@ function Posts() {
 
   const handleAddPost = async () => {
     const newPost = {
-      userId: user.id,
+      userId: parseInt(user.id,10),
+      id: nextPostId.toString(),
       title: newPostTitle,
-      body: newPostBody,
+      body: newPostBody
     };
 
     try {
@@ -71,6 +85,7 @@ function Posts() {
       setShowAddPost(false);
       setNewPostTitle('');
       setNewPostBody('');
+      setNextPostId(nextPostId + 1);
     } catch (error) {
       console.error('Error adding post:', error);
     }
@@ -118,10 +133,15 @@ function Posts() {
       <div className="content">
         <ul className="post-list">
           {filteredPosts.map((post) => (
-            <li key={post.id} className="post-item">
-              <span onClick={() => handlePostClick(post)}>{post.title}</span>
-              <button className="remove-btn" onClick={() => setRemovePostId(post.id)}>Remove</button>
-            </li>
+            <li key={post.id} className="post-item" onClick={() => handlePostClick(post)}>
+            <span>{post.title}</span>
+            <button className="remove-btn" onClick={(e) => {
+              e.stopPropagation();
+              setRemovePostId(post.id);
+            }}>
+              Remove
+            </button>
+          </li>
           ))}
         </ul>
       </div>
