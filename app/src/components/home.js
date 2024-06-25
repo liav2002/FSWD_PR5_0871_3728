@@ -36,10 +36,10 @@ function Home() {
             </Link>
           </div>
         </div>
-        <span className="navbar-name">{user.name}</span>
+        <span className="navbar-name">Connected User: {user.name}</span>
       </nav>
       <div className="container">
-        <div className="content">
+        <div>
           <Switch>
             <Route path={`${path}/info`} component={Info} />
             <Route path={`${path}/todos`} component={Todos} />

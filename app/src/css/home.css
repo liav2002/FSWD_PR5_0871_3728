@@ -35,11 +35,13 @@ width: 100%;
 }
 
 .navbar-name {
-font-family: courier;
-position: absolute;
-top: 10px;
-font-size: x-large;
-background: #E9E2D0;
+  font-family: courier;
+  font-size: 20px; /* Adjust the font size as needed */
+  font-weight: bold; /* Make the text bold */
+  position: absolute;
+  top: 10px;
+  color: #333; /* Darken the color slightly */
+  padding: 5px 10px; /* Add padding for better visibility */
 }
 
 .navbar .menu-items {

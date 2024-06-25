@@ -55,11 +55,11 @@
 .todo-list {
   background: #e8afaf;
   list-style-type: none;
-  height: calc(100% - 100px); /* Adjust the space as needed */
+  height: calc(100% - 10px); /* Adjust the space as needed */
   overflow-y: auto;
   padding: 0;
   margin: 0;
-  margin-bottom: 100px; /* White space at the bottom */
+  margin-bottom: 10px; /* White space at the bottom */
 }
   
   .todo-item {
