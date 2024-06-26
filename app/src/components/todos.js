@@ -11,6 +11,8 @@ function Todos() {
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [password, setPassword] = useState('');
   const [removeTodoId, setRemoveTodoId] = useState(null);
+  const [editingTodoId, setEditingTodoId] = useState(null);
+  const [editingTodoTitle, setEditingTodoTitle] = useState('');
 
   useEffect(() => {
     fetchTodos();
@@ -129,6 +131,35 @@ function Todos() {
     }
   };
 
+  const startEditing = (todo) => {
+    setEditingTodoId(todo.id);
+    setEditingTodoTitle(todo.title);
+  };
+
+  const saveEditTodo = async () => {
+    try {
+      const updatedTodo = { ...todos.find(todo => todo.id === editingTodoId), title: editingTodoTitle };
+      await fetch(`http://localhost:8000/todos/${editingTodoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTodo),
+      });
+      setTodos(todos.map(todo => (todo.id === editingTodoId ? updatedTodo : todo)));
+      setEditingTodoId(null);
+      setEditingTodoTitle('');
+    } catch (error) {
+      console.error('Error saving edited todo:', error);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingTodoId(null);
+    setEditingTodoTitle('');
+  };
+
+
   const filteredTodos = sortedTodos.filter((todo) =>
     todo.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -159,17 +190,36 @@ function Todos() {
 
       <div className="content">
         <ul className="todo-list">
-            {filteredTodos.map((todo) => (
-              <li key={todo.id} className="todo-item">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleComplete(todo.id)}
-                />
-                {todo.title}
-                <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
-              </li>
-            ))}
+          {filteredTodos.map((todo) => (
+            <li key={todo.id} className="todo-item">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleComplete(todo.id)}
+              />
+              {editingTodoId === todo.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editingTodoTitle}
+                    onChange={(e) => setEditingTodoTitle(e.target.value)}
+                  />
+                  <div className="button-group">
+                    <button className="save-btn" onClick={saveEditTodo}>Save</button>
+                    <button className="cancel-btn" onClick={cancelEdit}>Cancel</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {todo.title}
+                  <div className="button-group">
+                    <button className="edit-btn" onClick={() => startEditing(todo)}>Edit</button>
+                    <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
         </ul>
       </div>
 
