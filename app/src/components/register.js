@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import '../css/authentication.css';
 
 function Register() {
@@ -305,6 +305,7 @@ function Register() {
                         <button className="button" type="submit">Register</button>
                     </>
                 )}
+                <Link to="/login" className="register-link">Already have an account? Login here.</Link>
             </form>
         </div>
     );
