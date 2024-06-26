@@ -5,11 +5,14 @@ function Todos() {
   const user = JSON.parse(localStorage.getItem('user'));
   const [todos, setTodos] = useState([]);
   const [nextId, setNextId] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('serial');
   const [showAddTodo, setShowAddTodo] = useState(false);
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [password, setPassword] = useState('');
   const [removeTodoId, setRemoveTodoId] = useState(null);
+  const [editingTodoId, setEditingTodoId] = useState(null);
+  const [editingTodoTitle, setEditingTodoTitle] = useState('');
 
   useEffect(() => {
     fetchTodos();
@@ -128,11 +131,51 @@ function Todos() {
     }
   };
 
+  const startEditing = (todo) => {
+    setEditingTodoId(todo.id);
+    setEditingTodoTitle(todo.title);
+  };
+
+  const saveEditTodo = async () => {
+    try {
+      const updatedTodo = { ...todos.find(todo => todo.id === editingTodoId), title: editingTodoTitle };
+      await fetch(`http://localhost:8000/todos/${editingTodoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTodo),
+      });
+      setTodos(todos.map(todo => (todo.id === editingTodoId ? updatedTodo : todo)));
+      setEditingTodoId(null);
+      setEditingTodoTitle('');
+    } catch (error) {
+      console.error('Error saving edited todo:', error);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingTodoId(null);
+    setEditingTodoTitle('');
+  };
+
+
+  const filteredTodos = sortedTodos.filter((todo) =>
+    todo.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container">
       <div className="header">
         <div className="page-header">
           <h1 className="title">Todos</h1>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search todos by title"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <select className="sort-select" value={sortOption} onChange={handleSortChange}>
             <option value="serial">Sort by Serial</option>
             <option value="execution">Sort by Complete</option>
@@ -147,17 +190,36 @@ function Todos() {
 
       <div className="content">
         <ul className="todo-list">
-            {sortedTodos.map((todo) => (
-              <li key={todo.id} className="todo-item">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleComplete(todo.id)}
-                />
-                {todo.title}
-                <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
-              </li>
-            ))}
+          {filteredTodos.map((todo) => (
+            <li key={todo.id} className="todo-item">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleComplete(todo.id)}
+              />
+              {editingTodoId === todo.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editingTodoTitle}
+                    onChange={(e) => setEditingTodoTitle(e.target.value)}
+                  />
+                  <div className="button-group">
+                    <button className="save-btn" onClick={saveEditTodo}>Save</button>
+                    <button className="cancel-btn" onClick={cancelEdit}>Cancel</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {todo.title}
+                  <div className="button-group">
+                    <button className="edit-btn" onClick={() => startEditing(todo)}>Edit</button>
+                    <button className="remove-btn" onClick={() => setRemoveTodoId(todo.id)}>Remove</button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
         </ul>
       </div>
 
