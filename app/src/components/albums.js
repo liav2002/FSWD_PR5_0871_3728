@@ -14,6 +14,12 @@ function Albums() {
   const [newAlbumTitle, setNewAlbumTitle] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [nextAlbumId, setNextAlbumtId] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [newPhotoTitle, setNewPhotoTitle] = useState('');
+  const [newPhotoUrl, setNewPhotoUrl] = useState('');
+  const [newPhotoThumbnailUrl, setNewPhotoThumbnailUrl] = useState('');
+  const [nextPhotoId, setNextPhotoId] = useState(null);
+
 
   const fetchAlbums = async () => {
     try {
@@ -47,6 +53,17 @@ function Albums() {
       setNextAlbumtId(maxId >= 0 ? maxId + 1 : 1);
     } catch (error) {
       console.error('Error initial next album id:', error);
+    }
+  };
+
+  const initNextPhotoId = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/photos/`);
+      const data = await response.json();
+      const maxId = Math.max(...data.map(photo => parseInt(photo.id, 10)));
+      setNextPhotoId(maxId >= 0 ? maxId + 1 : 1);
+    } catch (error) {
+      console.error('Error initial next post id:', error);
     }
   };
 
@@ -104,6 +121,36 @@ function Albums() {
     }
   };
 
+  const addNewPhoto = async () => {
+    try {
+      setIsUploading(true);
+      const response = await fetch('http://localhost:8000/photos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          albumId: selectedAlbum,
+          id: nextPhotoId.toString(), // Ensure newPhotoId is unique for each new photo
+          title: newPhotoTitle,
+          url: "https://via.placeholder.com/600/" + newPhotoUrl,
+          thumbnailUrl: "https://via.placeholder.com/150/" + newPhotoUrl,
+        }),
+      });
+      const data = await response.json();
+      setPhotos((prevPhotos) => [...prevPhotos, data]); // Update local state with new photo
+      setIsUploading(false);
+      // Optionally, clear input fields or close modal after successful upload
+      setNewPhotoTitle('');
+      setNewPhotoUrl('');
+      setNewPhotoThumbnailUrl('');
+    } catch (error) {
+      console.error('Error adding photo:', error);
+      setIsUploading(false);
+    }
+  };
+  
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
     setNewAlbumTitle('');
@@ -114,6 +161,7 @@ function Albums() {
   useEffect(() => {
     fetchAlbums();
     initNextAlbumId();
+    initNextPhotoId();
   }, []);
 
   const closeModal = () => {
@@ -176,6 +224,25 @@ function Albums() {
                     Load More
                   </button>
                 )}
+                <div className="add-photo-section">
+                <h3>Add New Photo</h3>
+                <input
+                  type="text"
+                  value={newPhotoTitle}
+                  onChange={(e) => setNewPhotoTitle(e.target.value)}
+                  placeholder="Photo Title"
+                />
+                <input
+                  type="text"
+                  value={newPhotoUrl}
+                  onChange={(e) => setNewPhotoUrl(e.target.value)}
+                  placeholder="Photo URL"
+                />
+                <button onClick={addNewPhoto} disabled={isUploading}>
+                  {isUploading ? 'Uploading...' : 'Upload Photo'}
+                </button>
+              </div>
+
               </div>
             </div>
           </div>
