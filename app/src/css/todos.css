@@ -144,3 +144,8 @@
     margin-left: 10px; /* Adjust margin as needed */
     margin-right: 125px;
   }
+
+  .search-input {
+    padding: 8px;
+    margin-right: 50px;
+  }

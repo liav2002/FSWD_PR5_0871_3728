@@ -5,6 +5,7 @@ function Todos() {
   const user = JSON.parse(localStorage.getItem('user'));
   const [todos, setTodos] = useState([]);
   const [nextId, setNextId] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('serial');
   const [showAddTodo, setShowAddTodo] = useState(false);
   const [newTodoTitle, setNewTodoTitle] = useState('');
@@ -128,11 +129,22 @@ function Todos() {
     }
   };
 
+  const filteredTodos = sortedTodos.filter((todo) =>
+    todo.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container">
       <div className="header">
         <div className="page-header">
           <h1 className="title">Todos</h1>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search todos by title"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <select className="sort-select" value={sortOption} onChange={handleSortChange}>
             <option value="serial">Sort by Serial</option>
             <option value="execution">Sort by Complete</option>
@@ -147,7 +159,7 @@ function Todos() {
 
       <div className="content">
         <ul className="todo-list">
-            {sortedTodos.map((todo) => (
+            {filteredTodos.map((todo) => (
               <li key={todo.id} className="todo-item">
                 <input
                   type="checkbox"
