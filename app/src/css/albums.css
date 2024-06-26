@@ -1,0 +1,186 @@
+.container_albums {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    width: 100%; /* Ensure container takes full width */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  }
+  
+  .header_albums {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .search_bar_albums {
+    margin-bottom: 10px;
+    margin-left: 30px;
+  }
+  
+  .album_content_container {
+    background: #ffffff;
+    width: 80%; /* Ensure the content container takes full width */
+    max-width: 800px; /* Optional: Limit the maximum width */
+    box-sizing: border-box;
+    text-align: center;
+    justify-content: space-between; /* Distribute space between elements */
+    padding: 20px;
+  }
+  
+  .album_list_container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-height: 600px;
+    overflow-y: auto;
+    margin-right: 20px;
+  }
+  
+  .album_list_header {
+    font-size: 30px;
+    color: purple;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .album_link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: black;
+    text-decoration: none;
+    white-space: normal; /* Allow the text to wrap to the next line */
+    word-wrap: break-word; /* Ensure long words break and wrap to the next line */
+  }
+  
+  .album_link:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .remove_button {
+    flex-shrink: 0; /* Ensure the button doesn't shrink */
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  
+  .selected_album {
+    background-color: #e0e0e0;
+  }
+  
+  .photos_header {
+    font-size: 30px;
+    color: purple;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .photos_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .photos_list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px; /* Adjust max-width to limit the grid's width */
+  }
+  
+  .photo_item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .photo_image {
+    width: 100%; /* Make image take full width of its container */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 5px;
+  }
+
+  
+  .load_more_button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: purple;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .load_more_button:hover {
+    background-color: darkpurple;
+  }
+
+  
+  .modal {
+    position: fixed;
+    top: 30px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Increased max-width for more space */
+    max-height: 90%; /* Increased max-height */
+    overflow-y: auto; /* Add vertical scrollbar when content exceeds height */
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  
+
+  .close_album {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #7c1a86;
+  }
+  
+  .search-input {
+    padding: 8px;
+    margin-right: 10px;
+  }
+  
+  .add-album-btn {
+    padding: 10px 20px;
+    background-color: #7c1a86;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 150px;
+  }
