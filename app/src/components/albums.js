@@ -50,6 +50,18 @@ function Albums() {
     }
   };
 
+  const fetchAllPhotosOfAlbum = async (albumId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/photos?albumId=${albumId}`);
+      const data = await response.json();
+      console.log("data:");
+      console.log(data);
+      setPhotos(data);
+    } catch (error) {
+      console.log(`Error fetching photos for album ${albumId}:`, error);
+    }
+  };
+
   const initNextAlbumId = async () => {
     try {
       const response = await fetch(`http://localhost:8000/albums/`);
@@ -155,25 +167,39 @@ function Albums() {
       alert("Please enter your password");
       return;
     }
-
+  
     try {
       const authResponse = await fetch(`http://localhost:8000/users/${user.id}`);
       const authData = await authResponse.json();
-
+  
       if (authData.password !== password) {
         alert("Incorrect password");
         return;
       }
-
+  
       if (itemType === 'album') {
+        // Fetch photos of the album to be deleted
+        const photosResponse = await fetch(`http://localhost:8000/photos?albumId=${itemToRemove}`);
+        const photosData = await photosResponse.json();
+  
+        // Delete the album
         await fetch(`http://localhost:8000/albums/${itemToRemove}`, { method: 'DELETE' });
         setAlbums(albums.filter(album => album.id !== itemToRemove));
         setFilteredAlbums(filteredAlbums.filter(album => album.id !== itemToRemove));
+  
+        // Delete photos associated with the album
+        for (let i = 0; i < photosData.length; i++) {
+          await fetch(`http://localhost:8000/photos/${photosData[i].id}`, { method: 'DELETE' });
+        }
+  
+        // Clear photos state
+        setPhotos([]);
       } else if (itemType === 'photo') {
+        // Delete the photo
         await fetch(`http://localhost:8000/photos/${itemToRemove}`, { method: 'DELETE' });
         setPhotos(photos.filter(photo => photo.id !== itemToRemove));
       }
-
+  
       setPassword('');
       setIsPasswordModalOpen(false);
       setItemToRemove(null);
@@ -182,6 +208,7 @@ function Albums() {
       console.error('Error removing item:', error);
     }
   };
+  
 
   const openPasswordModal = (itemId, type) => {
     setItemToRemove(itemId);
