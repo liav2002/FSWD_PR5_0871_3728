@@ -258,15 +258,18 @@ function Albums() {
       </div>
       <div className="album_content_container">
         <div className="album_list_container">
-          {filteredAlbums.map((album) => (
-            <div key={album.id} className={`album_link ${selectedAlbum === album.id ? 'selected_album' : ''}`}>
-              <Link to={`${url}/links`} onClick={() => handleLinkClick(album.id)}>
-                {album.title}
-              </Link>
+            {filteredAlbums.map((album) => (
+              <Link
+              key={album.id}
+              to={`${url}/links`}
+              onClick={() => handleLinkClick(album.id)}
+              className={`album_link ${selectedAlbum === album.id ? 'selected_album' : ''}`}
+            >
+              {album.title}
               <button className="remove_button" onClick={() => openPasswordModal(album.id, 'album')}>Remove</button>
-            </div>
-          ))}
-        </div>
+            </Link>
+            ))}
+          </div>
         {selectedAlbum !== null && !isModalOpen && (
           <div className="modal">
             <div className="modal-content">
