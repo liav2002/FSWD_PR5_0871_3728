@@ -8,7 +8,6 @@ function Albums() {
   const [filteredAlbums, setFilteredAlbums] = useState([]);
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [photos, setPhotos] = useState([]);
-  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAlbumTitle, setNewAlbumTitle] = useState('');
@@ -17,8 +16,8 @@ function Albums() {
   const [isUploading, setIsUploading] = useState(false);
   const [newPhotoTitle, setNewPhotoTitle] = useState('');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
-  const [newPhotoThumbnailUrl, setNewPhotoThumbnailUrl] = useState('');
   const [nextPhotoId, setNextPhotoId] = useState(null);
+  const [limit, setLimit] = useState(5);
 
   const fetchAlbums = async () => {
     try {
@@ -31,10 +30,10 @@ function Albums() {
     }
   };
 
-  const fetchPhotos = async (albumId, page) => {
+  const fetchPhotos = async (albumId) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:8000/photos/?albumId=${albumId}&_page=${page}&_limit=5`);
+      const response = await fetch(`http://localhost:8000/photos/?albumId=${albumId}&_limit=${limit}`);
       const data = await response.json();
       setPhotos((prevPhotos) => {
         const newPhotos = data.filter(newPhoto => !prevPhotos.some(photo => photo.id === newPhoto.id));
@@ -75,15 +74,13 @@ function Albums() {
     } else {
       setSelectedAlbum(albumId);
       setPhotos([]);
-      setPage(1);
-      fetchPhotos(albumId, 1);
+      fetchPhotos(albumId);
     }
   };
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    fetchPhotos(selectedAlbum, nextPage);
-    setPage(nextPage);
+    setLimit(limit + 5);
+    fetchPhotos(selectedAlbum);
   };
 
   const handleSearch = (event) => {
@@ -107,7 +104,7 @@ function Albums() {
         },
         body: JSON.stringify({
           id: nextAlbumId.toString(),
-          userId: user.id,
+          userId: parseInt(user.id, 10),
           title: newAlbumTitle,
         }),
       });
@@ -130,7 +127,7 @@ function Albums() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          albumId: selectedAlbum,
+          albumId: parseInt(selectedAlbum, 10),
           id: nextPhotoId.toString(), // Ensure newPhotoId is unique for each new photo
           title: newPhotoTitle,
           url: "https://via.placeholder.com/600/" + newPhotoUrl,
@@ -143,7 +140,6 @@ function Albums() {
       // Optionally, clear input fields or close modal after successful upload
       setNewPhotoTitle('');
       setNewPhotoUrl('');
-      setNewPhotoThumbnailUrl('');
     } catch (error) {
       console.error('Error adding photo:', error);
       setIsUploading(false);
