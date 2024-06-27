@@ -20,7 +20,6 @@ function Albums() {
   const [newPhotoThumbnailUrl, setNewPhotoThumbnailUrl] = useState('');
   const [nextPhotoId, setNextPhotoId] = useState(null);
 
-
   const fetchAlbums = async () => {
     try {
       const response = await fetch(`http://localhost:8000/albums/?userId=${user.id}`);
@@ -37,7 +36,11 @@ function Albums() {
       setIsLoading(true);
       const response = await fetch(`http://localhost:8000/photos/?albumId=${albumId}&_page=${page}&_limit=10`);
       const data = await response.json();
-      setPhotos((prevPhotos) => [...prevPhotos, ...data]);
+      setPhotos((prevPhotos) => {
+        // Filter out duplicates
+        const newPhotos = data.filter(newPhoto => !prevPhotos.some(photo => photo.id === newPhoto.id));
+        return [...prevPhotos, ...newPhotos];
+      });
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -52,7 +55,7 @@ function Albums() {
       const maxId = Math.max(...data.map(album => parseInt(album.id, 10)));
       setNextAlbumtId(maxId >= 0 ? maxId + 1 : 1);
     } catch (error) {
-      console.error('Error initial next album id:', error);
+      console.error('Error initializing next album id:', error);
     }
   };
 
@@ -63,17 +66,16 @@ function Albums() {
       const maxId = Math.max(...data.map(photo => parseInt(photo.id, 10)));
       setNextPhotoId(maxId >= 0 ? maxId + 1 : 1);
     } catch (error) {
-      console.error('Error initial next post id:', error);
+      console.error('Error initializing next photo id:', error);
     }
   };
-
 
   const handleLinkClick = (albumId) => {
     if (isModalOpen) {
       setIsModalOpen(false);
     } else {
       setSelectedAlbum(albumId);
-      setPhotos([]);
+      setPhotos([]); // Reset photos when changing albums
       setPage(1);
       fetchPhotos(albumId, 1);
     }
@@ -108,7 +110,6 @@ function Albums() {
           id: nextAlbumId.toString(),
           userId: user.id,
           title: newAlbumTitle,
-          
         }),
       });
       const data = await response.json();
@@ -149,7 +150,6 @@ function Albums() {
       setIsUploading(false);
     }
   };
-  
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -225,24 +225,23 @@ function Albums() {
                   </button>
                 )}
                 <div className="add-photo-section">
-                <h3>Add New Photo</h3>
-                <input
-                  type="text"
-                  value={newPhotoTitle}
-                  onChange={(e) => setNewPhotoTitle(e.target.value)}
-                  placeholder="Photo Title"
-                />
-                <input
-                  type="text"
-                  value={newPhotoUrl}
-                  onChange={(e) => setNewPhotoUrl(e.target.value)}
-                  placeholder="Photo URL"
-                />
-                <button onClick={addNewPhoto} disabled={isUploading}>
-                  {isUploading ? 'Uploading...' : 'Upload Photo'}
-                </button>
-              </div>
-
+                  <h3>Add New Photo</h3>
+                  <input
+                    type="text"
+                    value={newPhotoTitle}
+                    onChange={(e) => setNewPhotoTitle(e.target.value)}
+                    placeholder="Photo Title"
+                  />
+                  <input
+                    type="text"
+                    value={newPhotoUrl}
+                    onChange={(e) => setNewPhotoUrl(e.target.value)}
+                    placeholder="Photo URL"
+                  />
+                  <button onClick={addNewPhoto} disabled={isUploading}>
+                    {isUploading ? 'Uploading...' : 'Upload Photo'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
