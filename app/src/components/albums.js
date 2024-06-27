@@ -176,7 +176,6 @@ function Albums() {
         setFilteredAlbums(filteredAlbums.filter(album => album.id !== itemToRemove));
   
         // Delete photos associated with the album in parallel
-        console.log("photosData length:", photosData.length);
         await Promise.all(photosData.map(async (photo) => {
           try {
             const response = await fetch(`http://localhost:8000/photos/${parseInt(photo.id, 10)}`, { method: 'DELETE' });
