@@ -34,10 +34,9 @@ function Albums() {
   const fetchPhotos = async (albumId, page) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:8000/photos/?albumId=${albumId}&_page=${page}&_limit=10`);
+      const response = await fetch(`http://localhost:8000/photos/?albumId=${albumId}&_page=${page}&_limit=5`);
       const data = await response.json();
       setPhotos((prevPhotos) => {
-        // Filter out duplicates
         const newPhotos = data.filter(newPhoto => !prevPhotos.some(photo => photo.id === newPhoto.id));
         return [...prevPhotos, ...newPhotos];
       });
@@ -75,7 +74,7 @@ function Albums() {
       setIsModalOpen(false);
     } else {
       setSelectedAlbum(albumId);
-      setPhotos([]); // Reset photos when changing albums
+      setPhotos([]);
       setPage(1);
       fetchPhotos(albumId, 1);
     }
@@ -214,7 +213,9 @@ function Albums() {
                           src={photo.thumbnailUrl}
                           alt={photo.title}
                           className="photo_image"
+                          onError={(e) => { e.target.onerror = null; e.target.src="https://via.placeholder.com/150"; }} // Handle broken images
                         />
+                        <p>{photo.title}</p>
                       </a>
                     </div>
                   ))}
