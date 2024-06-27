@@ -21,7 +21,6 @@ function Albums() {
   const [password, setPassword] = useState('');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
-  const [itemType, setItemType] = useState('');
 
   const fetchAlbums = async () => {
     try {
@@ -165,31 +164,7 @@ function Albums() {
         return;
       }
   
-      if (itemType === 'album') {
-        // Fetch photos of the album to be deleted
-        const photosResponse = await fetch(`http://localhost:8000/photos?albumId=${itemToRemove}`);
-        const photosData = await photosResponse.json();
-  
-        // Delete the album
-        await fetch(`http://localhost:8000/albums/${itemToRemove}`, { method: 'DELETE' });
-        setAlbums(albums.filter(album => album.id !== itemToRemove));
-        setFilteredAlbums(filteredAlbums.filter(album => album.id !== itemToRemove));
-  
-        // Delete photos associated with the album in parallel
-        await Promise.all(photosData.map(async (photo) => {
-          try {
-            const response = await fetch(`http://localhost:8000/photos/${parseInt(photo.id, 10)}`, { method: 'DELETE' });
-            if (!response.ok) {
-              throw new Error(`Failed to delete photo with id ${photo.id}`);
-            }
-          } catch (error) {
-            console.error(`Error deleting photo with id ${photo.id}:`, error);
-          }
-        }));
-  
-        // Clear photos state
-        setPhotos([]);
-      } else if (itemType === 'photo') {
+      else {
         // Delete the photo
         await fetch(`http://localhost:8000/photos/${itemToRemove}`, { method: 'DELETE' });
         setPhotos(photos.filter(photo => photo.id !== itemToRemove));
@@ -198,7 +173,6 @@ function Albums() {
       setPassword('');
       setIsPasswordModalOpen(false);
       setItemToRemove(null);
-      setItemType('');
     } catch (error) {
       console.error('Error removing item:', error);
     }
@@ -207,9 +181,8 @@ function Albums() {
   
   
 
-  const openPasswordModal = (itemId, type) => {
+  const openPasswordModal = (itemId) => {
     setItemToRemove(itemId);
-    setItemType(type);
     setIsPasswordModalOpen(true);
   };
 
@@ -217,7 +190,6 @@ function Albums() {
     setPassword('');
     setIsPasswordModalOpen(false);
     setItemToRemove(null);
-    setItemType('');
   };
 
 
@@ -237,6 +209,8 @@ function Albums() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedAlbum(null);
+    setPhotos([]);
+    setLimit(5);
   };
 
   return (
@@ -266,7 +240,6 @@ function Albums() {
               className={`album_link ${selectedAlbum === album.id ? 'selected_album' : ''}`}
             >
               {album.title}
-              <button className="remove_button" onClick={() => openPasswordModal(album.id, 'album')}>Remove</button>
             </Link>
             ))}
           </div>
@@ -289,7 +262,7 @@ function Albums() {
                         />
                         <p>{photo.title}</p>
                       </a>
-                      <button className="remove_button" onClick={() => openPasswordModal(photo.id, 'photo')}>Remove</button>
+                      <button className="remove_button" onClick={() => openPasswordModal(photo.id)}>Remove</button>
                     </div>
                   ))}
                 </div>
