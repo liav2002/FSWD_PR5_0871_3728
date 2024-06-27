@@ -50,18 +50,6 @@ function Albums() {
     }
   };
 
-  const fetchAllPhotosOfAlbum = async (albumId) => {
-    try {
-      const response = await fetch(`http://localhost:8000/photos?albumId=${albumId}`);
-      const data = await response.json();
-      console.log("data:");
-      console.log(data);
-      setPhotos(data);
-    } catch (error) {
-      console.log(`Error fetching photos for album ${albumId}:`, error);
-    }
-  };
-
   const initNextAlbumId = async () => {
     try {
       const response = await fetch(`http://localhost:8000/albums/`);
@@ -187,10 +175,18 @@ function Albums() {
         setAlbums(albums.filter(album => album.id !== itemToRemove));
         setFilteredAlbums(filteredAlbums.filter(album => album.id !== itemToRemove));
   
-        // Delete photos associated with the album
-        for (let i = 0; i < photosData.length; i++) {
-          await fetch(`http://localhost:8000/photos/${photosData[i].id}`, { method: 'DELETE' });
-        }
+        // Delete photos associated with the album in parallel
+        console.log("photosData length:", photosData.length);
+        await Promise.all(photosData.map(async (photo) => {
+          try {
+            const response = await fetch(`http://localhost:8000/photos/${parseInt(photo.id, 10)}`, { method: 'DELETE' });
+            if (!response.ok) {
+              throw new Error(`Failed to delete photo with id ${photo.id}`);
+            }
+          } catch (error) {
+            console.error(`Error deleting photo with id ${photo.id}:`, error);
+          }
+        }));
   
         // Clear photos state
         setPhotos([]);
@@ -208,6 +204,8 @@ function Albums() {
       console.error('Error removing item:', error);
     }
   };
+  
+  
   
 
   const openPasswordModal = (itemId, type) => {
