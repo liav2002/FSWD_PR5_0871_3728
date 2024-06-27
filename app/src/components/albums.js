@@ -18,6 +18,10 @@ function Albums() {
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [nextPhotoId, setNextPhotoId] = useState(null);
   const [limit, setLimit] = useState(5);
+  const [password, setPassword] = useState('');
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState(null);
+  const [itemType, setItemType] = useState('');
 
   const fetchAlbums = async () => {
     try {
@@ -146,6 +150,53 @@ function Albums() {
     }
   };
 
+  const removeItem = async () => {
+    if (!password) {
+      alert("Please enter your password");
+      return;
+    }
+
+    try {
+      const authResponse = await fetch(`http://localhost:8000/users/${user.id}`);
+      const authData = await authResponse.json();
+
+      if (authData.password !== password) {
+        alert("Incorrect password");
+        return;
+      }
+
+      if (itemType === 'album') {
+        await fetch(`http://localhost:8000/albums/${itemToRemove}`, { method: 'DELETE' });
+        setAlbums(albums.filter(album => album.id !== itemToRemove));
+        setFilteredAlbums(filteredAlbums.filter(album => album.id !== itemToRemove));
+      } else if (itemType === 'photo') {
+        await fetch(`http://localhost:8000/photos/${itemToRemove}`, { method: 'DELETE' });
+        setPhotos(photos.filter(photo => photo.id !== itemToRemove));
+      }
+
+      setPassword('');
+      setIsPasswordModalOpen(false);
+      setItemToRemove(null);
+      setItemType('');
+    } catch (error) {
+      console.error('Error removing item:', error);
+    }
+  };
+
+  const openPasswordModal = (itemId, type) => {
+    setItemToRemove(itemId);
+    setItemType(type);
+    setIsPasswordModalOpen(true);
+  };
+
+  const closePasswordModal = () => {
+    setPassword('');
+    setIsPasswordModalOpen(false);
+    setItemToRemove(null);
+    setItemType('');
+  };
+
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
     setNewAlbumTitle('');
@@ -184,14 +235,12 @@ function Albums() {
       <div className="album_content_container">
         <div className="album_list_container">
           {filteredAlbums.map((album) => (
-            <Link
-              key={album.id}
-              to={`${url}/links`}
-              onClick={() => handleLinkClick(album.id)}
-              className={`album_link ${selectedAlbum === album.id ? 'selected_album' : ''}`}
-            >
-              {album.title}
-            </Link>
+            <div key={album.id} className={`album_link ${selectedAlbum === album.id ? 'selected_album' : ''}`}>
+              <Link to={`${url}/links`} onClick={() => handleLinkClick(album.id)}>
+                {album.title}
+              </Link>
+              <button className="remove_button" onClick={() => openPasswordModal(album.id, 'album')}>Remove</button>
+            </div>
           ))}
         </div>
         {selectedAlbum !== null && !isModalOpen && (
@@ -213,6 +262,7 @@ function Albums() {
                         />
                         <p>{photo.title}</p>
                       </a>
+                      <button className="remove_button" onClick={() => openPasswordModal(photo.id, 'photo')}>Remove</button>
                     </div>
                   ))}
                 </div>
@@ -255,6 +305,21 @@ function Albums() {
                 placeholder="Enter album title"
               />
               <button onClick={createNewAlbum}>Create Album</button>
+            </div>
+          </div>
+        )}
+        {isPasswordModalOpen && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close_album" onClick={closePasswordModal}>&times;</span>
+              <h2>Confirm Removal</h2>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+              />
+              <button onClick={removeItem}>Confirm</button>
             </div>
           </div>
         )}

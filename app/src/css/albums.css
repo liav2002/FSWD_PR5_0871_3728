@@ -67,17 +67,6 @@
     background-color: #f1f1f1;
   }
   
-  .remove_button {
-    flex-shrink: 0; /* Ensure the button doesn't shrink */
-    background-color: red;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  
   .selected_album {
     background-color: #e0e0e0;
   }
@@ -107,16 +96,32 @@
   
   .photo_item {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 10px;
-    margin-bottom: 10px;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
+  }
+
+  .photo_content {
+    text-align: center; /* Center content within the photo item */
+  }
+
+  .photo_content a {
+    display: block; /* Make the anchor tag fill its container */
+    text-decoration: none; /* Remove underline from the link */
   }
   
   .photo_image {
-    width: 100%; /* Make image take full width of its container */
+    width: 100%; /* Adjust width as needed */
     height: auto; /* Maintain aspect ratio */
-    border-radius: 5px;
+  }
+
+  .remove_button {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 5px; /* Adjust margin as needed */
   }
 
   
@@ -183,4 +188,15 @@
     cursor: pointer;
     border-radius: 5px;
     margin-left: 150px;
+  }
+
+  .photo_remove_button {
+    flex-shrink: 0;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-bottom: 5px;
   }
